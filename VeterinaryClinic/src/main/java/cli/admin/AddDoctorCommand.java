@@ -19,7 +19,7 @@ public class AddDoctorCommand implements Command {
     public void execute() {
         String fullName = in.readLine("fullName: ");
         String specialization = in.readLine("specialization: ");
-        String phone = in.readLine("phone: ");
+        String phone = in.readPhone("phone: ");
 
         Doctor doctor = new Doctor(0L, fullName, specialization, phone);
         admin.addDoctor(doctor);

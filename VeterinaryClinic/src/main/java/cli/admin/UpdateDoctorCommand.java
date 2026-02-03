@@ -4,6 +4,7 @@ import cli.Command;
 import cli.util.InputReader;
 import domain.Doctor;
 import service.AdminService;
+import service.validator.PhoneValidator;
 
 public class UpdateDoctorCommand implements Command {
 
@@ -23,11 +24,18 @@ public class UpdateDoctorCommand implements Command {
 
         String fullName = in.readLine("fullName (enter = оставить): ");
         String specialization = in.readLine("specialization (enter = оставить): ");
-        String phone = in.readLine("phone (enter = оставить): ");
+        String phoneRaw = in.readLine("phone (enter = оставить): ");
+        if (!phoneRaw.isBlank()) {
+            String phone = PhoneValidator.validateAndNormalize(phoneRaw);
+            if (phone.isBlank()) {
+                System.out.println("Телефон неверный. Изменение отменено.");
+            } else {
+                current.setPhone(phone);
+            }
+        }
 
         if (!fullName.isBlank()) current.setFullName(fullName);
         if (!specialization.isBlank()) current.setSpecialization(specialization);
-        if (!phone.isBlank()) current.setPhone(phone);
 
         admin.updateDoctor(id, current);
         System.out.println("Доктор обновлён.");

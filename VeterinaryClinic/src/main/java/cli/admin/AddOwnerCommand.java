@@ -18,7 +18,7 @@ public class AddOwnerCommand implements Command {
     @Override
     public void execute() {
         String fullName = in.readLine("fullName: ");
-        String phone = in.readLine("phone: ");
+        String phone = in.readPhone("phone: ");
         String email = in.readLine("email: ");
         String address = in.readLine("address: ");
 

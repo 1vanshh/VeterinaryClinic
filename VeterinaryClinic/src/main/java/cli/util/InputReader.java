@@ -1,6 +1,9 @@
 package cli.util;
 
+import service.validator.PhoneValidator;
+
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -10,7 +13,8 @@ public class InputReader {
 
     private final Scanner scanner;
 
-    // Форматы, которые часто соответствуют timestamptz-вводу в PostgreSQL
+    private static final DateTimeFormatter SIMPLE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
     private static final List<DateTimeFormatter> TS_FORMATS = List.of(
             DateTimeFormatter.ISO_OFFSET_DATE_TIME,                  // 2026-02-03T14:30:00+01:00
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssXXX"),   // 2026-02-03 14:30:00+01:00
@@ -54,17 +58,34 @@ public class InputReader {
         while (true) {
             String s = readLine(prompt);
 
+            try {
+                return java.time.LocalDateTime.parse(s, SIMPLE_FORMAT)
+                        .atOffset(ZoneOffset.UTC);
+            } catch (DateTimeParseException ignored) {}
+
             for (DateTimeFormatter fmt : TS_FORMATS) {
                 try {
-                    return OffsetDateTime.parse(s, fmt);
+                    return OffsetDateTime.parse(s, fmt)
+                            .withOffsetSameInstant(ZoneOffset.UTC);
                 } catch (DateTimeParseException ignored) {}
             }
 
             System.out.println("Неверный формат даты/времени.");
-            System.out.println("Примеры (timestamptz):");
-            System.out.println("- 2026-02-03T14:30:00+01:00");
-            System.out.println("- 2026-02-03 14:30:00+01:00");
-            System.out.println("- 2026-02-03 14:30+01:00");
+            System.out.println("Примеры:");
+            System.out.println("- 2026-02-03 14:30");
+        }
+    }
+
+    public String readPhone(String prompt) {
+        while (true) {
+            String raw = readLine(prompt);
+            String phone = PhoneValidator.validateAndNormalize(raw);
+
+            if (!phone.isBlank()) {
+                return phone;
+            }
+
+            System.out.println("Телефон неверный. Введите 9–15 цифр (можно с +, пробелами, скобками).");
         }
     }
 }

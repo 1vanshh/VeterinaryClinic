@@ -23,8 +23,8 @@ public class BookAppointmentCommand implements Command {
         long petId = in.readLong("petId: ");
         long doctorId = in.readLong("doctorId: ");
 
-        OffsetDateTime start = in.readOffsetDateTime("startsAt (timestamptz): ");
-        OffsetDateTime end = in.readOffsetDateTime("endsAt (timestamptz): ");
+        OffsetDateTime start = in.readOffsetDateTime("startsAt (формат: ГГГГ-ММ-ДД ЧЧ:ММ, например 2026-02-03 14:30): ");
+        OffsetDateTime end = in.readOffsetDateTime("endsAt (формат: ГГГГ-ММ-ДД ЧЧ:ММ, например 2026-02-03 15:30): ");
 
         String reason = in.readLine("reason: ");
 

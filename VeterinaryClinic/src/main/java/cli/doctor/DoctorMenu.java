@@ -14,10 +14,8 @@ public class DoctorMenu extends BaseMenu {
         this.doctorId = doctorId;
         this.appointmentService = appointmentService;
 
-        addCommand(new ListMyAppointmentsCommand(doctorId, appointmentService));
         addCommand(new SetAppointmentStatusCommand(in, doctorId, appointmentService));
         addCommand(new ListAppointmentsCommand(doctorId, appointmentService));
-        addCommand(new SetStatusCommand(in, doctorId, appointmentService));
     }
 
     @Override

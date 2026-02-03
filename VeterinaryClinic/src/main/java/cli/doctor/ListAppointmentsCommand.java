@@ -14,7 +14,7 @@ public class ListAppointmentsCommand implements Command {
     private final long doctorId;
     private final AppointmentService service;
 
-    private static final DateTimeFormatter OUT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssXXX");
+    private static final DateTimeFormatter OUT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public ListAppointmentsCommand(long doctorId, AppointmentService service) {
         this.doctorId = doctorId;

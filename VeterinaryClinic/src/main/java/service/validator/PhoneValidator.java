@@ -11,14 +11,14 @@ public class PhoneValidator {
                 ? normalized.substring(1)
                 : normalized;
 
-        if (!digits.matches("\\d{10,15}")) {
-            return null;
+        if (!digits.matches("\\d{9,15}")) {
+            return "";
         }
 
         return digits;
     }
 
     public static boolean isValid(String rawPhone) {
-        return validateAndNormalize(rawPhone) != null;
+        return !validateAndNormalize(rawPhone).isBlank();
     }
 }

@@ -12,7 +12,7 @@ import java.util.List;
 public class ListAppointmentsCommand implements Command {
 
     private final AdminService admin;
-    private static final DateTimeFormatter OUT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssXXX");
+    private static final DateTimeFormatter OUT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public ListAppointmentsCommand(AdminService admin) {
         this.admin = admin;

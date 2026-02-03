@@ -4,6 +4,7 @@ import cli.Command;
 import cli.util.InputReader;
 import domain.Owner;
 import service.AdminService;
+import service.validator.PhoneValidator;
 
 public class UpdateOwnerCommand implements Command {
 
@@ -22,12 +23,19 @@ public class UpdateOwnerCommand implements Command {
         Owner current = admin.getOwnerById(id);
 
         String fullName = in.readLine("fullName (enter = оставить): ");
-        String phone = in.readLine("phone (enter = оставить): ");
+        String phoneRaw = in.readLine("phone (enter = оставить): ");
+        if (!phoneRaw.isBlank()) {
+            String phone = PhoneValidator.validateAndNormalize(phoneRaw);
+            if (phone.isBlank()) {
+                System.out.println("Телефон неверный. Изменение отменено.");
+            } else {
+                current.setPhone(phone);
+            }
+        }
         String email = in.readLine("email (enter = оставить): ");
         String address = in.readLine("address (enter = оставить): ");
 
         if (!fullName.isBlank()) current.setFullName(fullName);
-        if (!phone.isBlank()) current.setPhone(phone);
         if (!email.isBlank()) current.setEmail(email);
         if (!address.isBlank()) current.setAddress(address);
 

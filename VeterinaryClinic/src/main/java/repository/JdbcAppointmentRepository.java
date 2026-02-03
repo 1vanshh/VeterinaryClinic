@@ -99,8 +99,8 @@ public class JdbcAppointmentRepository implements AppointmentRepository {
              PreparedStatement ps = conn.prepareStatement(EXISTS_OVERLAP_SQL)) {
 
             ps.setLong(1, doctorId);
-            ps.setObject(2, start);
-            ps.setObject(3, end);
+            ps.setObject(2, end);
+            ps.setObject(3, start);
 
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
