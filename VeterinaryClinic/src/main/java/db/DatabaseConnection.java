@@ -1,16 +1,18 @@
 package db;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public final class DatabaseConnection {
 
     private static volatile DatabaseConnection instance;
-    private volatile Connection connection;
+    private final HikariDataSource dataSource;
 
     private DatabaseConnection() {
-        connectOrThrow();
+        dataSource = createDataSource();
     }
 
     public static DatabaseConnection getInstance() {
@@ -22,52 +24,36 @@ public final class DatabaseConnection {
         return instance;
     }
 
-    private void connectOrThrow() {
-        try {
-            Class.forName("org.postgresql.Driver");
+    private HikariDataSource createDataSource() {
+        HikariConfig cfg = new HikariConfig();
 
-            final String url  = DatabaseConfig.getProperty("db.url");
-            final String user = DatabaseConfig.getProperty("db.user");
-            final String pass = DatabaseConfig.getProperty("db.password");
+        cfg.setJdbcUrl(DatabaseConfig.getProperty("db.url"));
+        cfg.setUsername(DatabaseConfig.getProperty("db.user"));
+        cfg.setPassword(DatabaseConfig.getProperty("db.password"));
 
-            Connection conn = DriverManager.getConnection(url, user, pass);
+        cfg.setPoolName(DatabaseConfig.getProperty("db.pool.poolName", "AppPool"));
+        cfg.setMaximumPoolSize(Integer.parseInt(DatabaseConfig.getProperty("db.pool.maximumPoolSize", "10")));
+        cfg.setMinimumIdle(Integer.parseInt(DatabaseConfig.getProperty("db.pool.minimumIdle", "2")));
 
-            try {
-                if (!conn.isValid(2))
-                    throw new SQLException("Connection is not valid");
-            } catch (AbstractMethodError ignored) { }
+        cfg.setConnectionTimeout(Long.parseLong(DatabaseConfig.getProperty("db.pool.connectionTimeoutMs", "30000")));
+        cfg.setIdleTimeout(Long.parseLong(DatabaseConfig.getProperty("db.pool.idleTimeoutMs", "600000")));
+        cfg.setMaxLifetime(Long.parseLong(DatabaseConfig.getProperty("db.pool.maxLifetimeMs", "1800000")));
+        cfg.setValidationTimeout(Long.parseLong(DatabaseConfig.getProperty("db.pool.validationTimeoutMs", "5000")));
 
-            this.connection = conn;
-            System.out.println("Соединение с БД установлено");
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка подключения к БД: " + e.getMessage(), e);
-        }
-    }
-
-    private boolean alive() {
-        try {
-            return connection != null && !connection.isClosed();
-        } catch (SQLException e) {
-            return false;
-        }
+        return new HikariDataSource(cfg);
     }
 
     public Connection getConnection() {
-        if (!alive()) {
-            System.out.println("Переподключение к БД...");
-            connectOrThrow();
+        try {
+            return dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка получения соединения из пула: " + e.getMessage(), e);
         }
-        return connection;
     }
 
-    public void closeConnection() {
-        if (connection != null) {
-            try {
-                connection.close(); System.out.println("Соединение закрыто");
-            } catch (SQLException ignored) { }
-            finally {
-                connection = null;
-            }
+    public void shutdown() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
         }
     }
 }

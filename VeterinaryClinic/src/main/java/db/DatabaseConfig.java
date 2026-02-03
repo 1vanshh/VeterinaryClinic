@@ -1,11 +1,10 @@
 package db;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class DatabaseConfig {
+public final class DatabaseConfig {
 
     private static final String PROPERTIES_FILE = "db.properties";
     private static final Properties props = new Properties();
@@ -15,18 +14,23 @@ public class DatabaseConfig {
             if (input == null) {
                 throw new RuntimeException("Файл " + PROPERTIES_FILE + " не найден в classpath!");
             }
-
             props.load(input);
-
         } catch (IOException e) {
             throw new RuntimeException("Ошибка при чтении " + PROPERTIES_FILE, e);
         }
     }
 
     public static String getProperty(String key) {
-        if (!props.containsKey(key)) {
+        String val = props.getProperty(key);
+        if (val == null) {
             throw new IllegalArgumentException("Свойство с ключом '" + key + "' не найдено в " + PROPERTIES_FILE);
         }
-        return props.getProperty(key);
+        return val;
     }
+
+    public static String getProperty(String key, String defaultValue) {
+        return props.getProperty(key, defaultValue);
+    }
+
+    private DatabaseConfig() {}
 }
