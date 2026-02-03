@@ -12,13 +12,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
-public class JdbcDoctorRepository implements CrudRepository<Doctor, Long> {
+public class JdbcDoctorRepository implements DoctorRepository {
 
+    private static final String FIND_BY_PHONE_SQL = "SELECT * FROM doctor WHERE phone = ?";
     private static final String INSERT_SQL = "INSERT INTO doctor(full_name, specialization, phone) VALUES (?,?,?)";
     private static final String UPDATE_SQL = "UPDATE doctor SET full_name = ?, specialization = ?, phone = ? WHERE id = ?";
     private static final String DELETE_SQL = "DELETE FROM doctor WHERE id = ?";
     private static final String FIND_BY_ID_SQL = "SELECT * FROM doctor WHERE id = ?";
     private static final String FIND_ALL_SQL = "SELECT * FROM doctor";
+
+    @Override
+    public Doctor findByPhone(String phone) {
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(FIND_BY_PHONE_SQL)) {
+
+            ps.setString(1, phone);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapDoctor(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
 
     @Override
     public void insert(Doctor entity) {

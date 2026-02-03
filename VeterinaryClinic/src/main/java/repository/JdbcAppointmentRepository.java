@@ -16,6 +16,10 @@ public class JdbcAppointmentRepository implements AppointmentRepository {
 
 
     private static final String FIND_BY_DOCTOR_SQL = "SELECT * FROM appointment WHERE doctor_id = ?";
+    private static final String FIND_BY_PET_SQL = "SELECT * FROM appointment WHERE pet_id = ?";
+    private static final String EXISTS_OVERLAP_SQL =
+            "SELECT EXISTS(SELECT 1 FROM appointment WHERE doctor_id = ? AND status <> 'cancelled' AND starts_at < ? AND ends_at > ?)";
+
     private static final String EXISTS_BY_DOCTOR_SQL =
             "SELECT EXISTS(SELECT 1 FROM appointment WHERE doctor_id = ? AND starts_at = ?)";
 
@@ -51,12 +55,52 @@ public class JdbcAppointmentRepository implements AppointmentRepository {
     }
 
     @Override
+    public List<Appointment> findByPetId(long petId) {
+        List<Appointment> appointments = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(FIND_BY_PET_SQL)) {
+
+            ps.setLong(1, petId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    appointments.add(mapAppointment(rs));
+                }
+            }
+            return appointments;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public boolean existsByDoctorAndTime(long doctorId, OffsetDateTime startsAt) {
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(EXISTS_BY_DOCTOR_SQL)) {
 
             ps.setLong(1, doctorId);
             ps.setObject(2, startsAt);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getBoolean(1);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean existsOverlapping(long doctorId, OffsetDateTime start, OffsetDateTime end) {
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(EXISTS_OVERLAP_SQL)) {
+
+            ps.setLong(1, doctorId);
+            ps.setObject(2, start);
+            ps.setObject(3, end);
 
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
