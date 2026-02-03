@@ -1,8 +1,8 @@
 package repository;
 
 import db.DatabaseConnection;
-import domain.Doctor;
-import lombok.NoArgsConstructor;
+import domain.Role;
+import domain.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,23 +11,39 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-@NoArgsConstructor
-public class JdbcDoctorRepository implements CrudRepository<Doctor, Long> {
+public class JdbcUserRepository implements UserRepository {
 
-    private static final String INSERT_SQL = "INSERT INTO doctor(full_name, specialization, phone) VALUES (?,?,?)";
-    private static final String UPDATE_SQL = "UPDATE doctor SET full_name = ?, specialization = ?, phone = ? WHERE id = ?";
-    private static final String DELETE_SQL = "DELETE FROM doctor WHERE id = ?";
-    private static final String FIND_BY_ID_SQL = "SELECT * FROM doctor WHERE id = ?";
-    private static final String FIND_ALL_SQL = "SELECT * FROM doctor";
+    private static final String FIND_BY_LOGIN_SQL = "SELECT * FROM users WHERE login = ?";
+    private static final String INSERT_SQL = "INSERT INTO users(login, role) VALUES (?,?)";
+    private static final String UPDATE_SQL = "UPDATE users SET login = ?, role = ? WHERE id = ?";
+    private static final String DELETE_SQL = "DELETE FROM users WHERE id = ?";
+    private static final String FIND_BY_ID_SQL = "SELECT * FROM users WHERE id = ?";
+    private static final String FIND_ALL_SQL = "SELECT * FROM users";
 
     @Override
-    public void insert(Doctor entity) {
+    public User findByLogin(String login) {
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(FIND_BY_LOGIN_SQL)) {
+
+            ps.setString(1, login);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapUser(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public void insert(User entity) {
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = connection.prepareStatement(INSERT_SQL)) {
 
-            ps.setString(1, entity.getFullName());
-            ps.setString(2, entity.getSpecialization());
-            ps.setString(3, entity.getPhone());
+            ps.setString(1, entity.login());
+            ps.setString(2, entity.role().dbValue());
 
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -36,14 +52,13 @@ public class JdbcDoctorRepository implements CrudRepository<Doctor, Long> {
     }
 
     @Override
-    public void update(Long id, Doctor entity) {
+    public void update(Long id, User entity) {
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = connection.prepareStatement(UPDATE_SQL)) {
 
-            ps.setString(1, entity.getFullName());
-            ps.setString(2, entity.getSpecialization());
-            ps.setString(3, entity.getPhone());
-            ps.setLong(4, id);
+            ps.setString(1, entity.login());
+            ps.setString(2, entity.role().dbValue());
+            ps.setLong(3, id);
 
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -65,14 +80,15 @@ public class JdbcDoctorRepository implements CrudRepository<Doctor, Long> {
     }
 
     @Override
-    public Doctor findById(Long id) {
+    public User findById(Long id) {
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(FIND_BY_ID_SQL)) {
 
             ps.setLong(1, id);
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return mapDoctor(rs);
+                    return mapUser(rs);
                 }
             }
         } catch (SQLException e) {
@@ -82,27 +98,26 @@ public class JdbcDoctorRepository implements CrudRepository<Doctor, Long> {
     }
 
     @Override
-    public List<Doctor> findAll() {
-        List<Doctor> doctors = new ArrayList<>();
+    public List<User> findAll() {
+        List<User> users = new ArrayList<>();
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(FIND_ALL_SQL);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                doctors.add(mapDoctor(rs));
+                users.add(mapUser(rs));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return doctors;
+        return users;
     }
 
-    private Doctor mapDoctor(ResultSet rs) throws SQLException {
-        return new Doctor(
+    private User mapUser(ResultSet rs) throws SQLException {
+        return new User(
                 rs.getLong("id"),
-                rs.getString("full_name"),
-                rs.getString("specialization"),
-                rs.getString("phone")
+                rs.getString("login"),
+                Role.fromDb(rs.getString("role"))
         );
     }
 }

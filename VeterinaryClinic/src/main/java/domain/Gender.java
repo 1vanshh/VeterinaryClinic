@@ -17,10 +17,13 @@ public enum Gender {
 
     public static Gender fromDb(String value) {
         if (value == null) return null;
-        return switch (value.toLowerCase()) {
-            case "male" -> MALE;
-            case "female" -> FEMALE;
-            default -> UNKNOWN;
-        };
+
+        for (Gender g : values()) {
+            if (g.dbValue.equalsIgnoreCase(value)) {
+                return g;
+            }
+        }
+
+        throw new IllegalArgumentException("Unknown gender from DB: " + value);
     }
 }

@@ -13,33 +13,35 @@ import java.util.List;
 
 public class JdbcPetRepository implements PetRepository {
 
-    private final String FIND_BY_OWNER_SQL = "SELECT * FROM pet WHERE owner_id = ?";
+    private static final String FIND_BY_OWNER_SQL = "SELECT * FROM pet WHERE owner_id = ?";
 
-    private final String INSERT_SQL =
+    private static final String INSERT_SQL =
             "INSERT INTO pet(owner_id, name, species, breed, gender) VALUES (?, ?, ?, ?, ?)";
 
-    private final String UPDATE_SQL =
-            "UPDATE pet SET owner_id = ?, name = ?, species = ? breed = ? gender = ? WHERE id = ?";
+    private static final String UPDATE_SQL =
+            "UPDATE pet SET owner_id = ?, name = ?, species = ?, breed = ?, gender = ? WHERE id = ?";
 
-    private final String DELETE_SQL = "DELETE FROM pet WHERE id = ?";
-    private final String FIND_BY_ID_SQL = "SELECT * FROM pet WHERE id = ?";
-    private final String FIND_ALL_SQL = "SELECT * FROM pet";
+    private static final String DELETE_SQL = "DELETE FROM pet WHERE id = ?";
+    private static final String FIND_BY_ID_SQL = "SELECT * FROM pet WHERE id = ?";
+    private static final String FIND_ALL_SQL = "SELECT * FROM pet";
 
     @Override
-    public Pet findByOwnerId(long ownerId) {
+    public List<Pet> findByOwnerId(long ownerId) {
+        List<Pet> pets = new ArrayList<>();
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(FIND_BY_OWNER_SQL)) {
 
             ps.setLong(1, ownerId);
+
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapPet(rs);
+                while (rs.next()) {
+                    pets.add(mapPet(rs));
                 }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return null;
+        return pets;
     }
 
     @Override
@@ -51,7 +53,7 @@ public class JdbcPetRepository implements PetRepository {
             ps.setString(2, entity.getName());
             ps.setString(3, entity.getSpecies());
             ps.setString(4, entity.getBreed());
-            ps.setString(5, entity.getGender().toString().toLowerCase());
+            ps.setString(5, entity.getGender().dbValue());
 
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -68,7 +70,8 @@ public class JdbcPetRepository implements PetRepository {
             ps.setString(2, entity.getName());
             ps.setString(3, entity.getSpecies());
             ps.setString(4, entity.getBreed());
-            ps.setString(5, entity.getGender().toString().toLowerCase());
+            ps.setString(5,
+                    entity.getGender() == null ? null : entity.getGender().dbValue());
             ps.setLong(6, id);
 
             ps.executeUpdate();
@@ -109,18 +112,18 @@ public class JdbcPetRepository implements PetRepository {
 
     @Override
     public List<Pet> findAll() {
-        List<Pet> doctors = new ArrayList<>();
+        List<Pet> pets = new ArrayList<>();
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(FIND_ALL_SQL);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                doctors.add(mapPet(rs));
+                pets.add(mapPet(rs));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return doctors;
+        return pets;
     }
 
     private Pet mapPet(ResultSet rs) throws SQLException {

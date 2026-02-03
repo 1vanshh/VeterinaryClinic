@@ -2,7 +2,9 @@ package repository;
 
 import domain.Pet;
 
+import java.util.List;
+
 public interface PetRepository extends CrudRepository<Pet, Long> {
 
-    Pet findByOwnerId(long ownerId);
+    List<Pet> findByOwnerId(long ownerId);
 }
