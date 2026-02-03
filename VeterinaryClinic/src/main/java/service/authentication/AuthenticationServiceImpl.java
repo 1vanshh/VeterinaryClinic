@@ -1,4 +1,4 @@
-package service.Authentication;
+package service.authentication;
 
 import domain.Doctor;
 import domain.Owner;

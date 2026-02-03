@@ -1,4 +1,4 @@
-package service.Authentication;
+package service.authentication;
 
 public interface AuthenticationService {
     AuthenticationResult login(String input);
