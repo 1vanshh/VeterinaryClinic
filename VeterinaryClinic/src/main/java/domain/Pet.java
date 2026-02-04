@@ -6,10 +6,11 @@ import lombok.*;
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 public class Pet {
 
-    private final long id;
-    private final long ownerId;
+    private long id;
+    private long ownerId;
 
     private String name;
     private String species;

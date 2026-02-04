@@ -1,9 +1,6 @@
 package domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 
@@ -11,11 +8,12 @@ import java.time.OffsetDateTime;
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 public class Appointment {
 
-    private final long id;
-    private final long petId;
-    private final long doctorId;
+    private long id;
+    private long petId;
+    private long doctorId;
 
     private OffsetDateTime startsAt;
     private OffsetDateTime endsAt;
