@@ -34,13 +34,7 @@ psql -U postgres -d VeterinaryClinic -f schema.sql
 mvn clean package
 ```
 
-## Запуск через Maven
-
-```bash
-mvn exec:java
-```
-
-## Или запуск JAR
+## Запуск
 
 ```bash
 java -jar target/*.jar
@@ -120,5 +114,3 @@ java -jar target/*.jar
 # Физическая схема БД
 
 ![Database Schema](VeterinaryClinic/images/Diagramm.png)
-
----
