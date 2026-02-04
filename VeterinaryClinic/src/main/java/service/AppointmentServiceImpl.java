@@ -9,7 +9,10 @@ import repository.DoctorRepository;
 import repository.PetRepository;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static service.validator.TimeValidator.validateTime;
 
@@ -127,5 +130,39 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setStatus(status);
 
         appointmentRepository.update(appointmentId, appointment);
+    }
+
+    @Override
+    public List<Pet> getDoctorPatients(long doctorId) {
+        List<Appointment> appointments = appointmentRepository.findByDoctorId(doctorId);
+
+        Set<Long> petIds = appointments.stream()
+                .map(Appointment::getPetId)
+                .collect(Collectors.toSet());
+
+        List<Pet> patients = new ArrayList<>();
+        for (Long petId : petIds) {
+            Pet pet = petRepository.findById(petId);
+            if (pet != null) {
+                patients.add(pet);
+            }
+        }
+
+        return patients;
+    }
+
+    @Override
+    public List<Appointment> getOwnerAppointments(long ownerId) {
+        List<Pet> ownerPets = petRepository.findByOwnerId(ownerId);
+
+        List<Appointment> allAppointments = new ArrayList<>();
+        for (Pet pet : ownerPets) {
+            List<Appointment> petAppointments = appointmentRepository.findByPetId(pet.getId());
+            allAppointments.addAll(petAppointments);
+        }
+
+        allAppointments.sort((a1, a2) -> a2.getStartsAt().compareTo(a1.getStartsAt()));
+
+        return allAppointments;
     }
 }

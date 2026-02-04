@@ -2,6 +2,7 @@ package service;
 
 import domain.Appointment;
 import domain.AppointmentStatus;
+import domain.Pet;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -19,5 +20,9 @@ public interface AppointmentService {
     List<Appointment> getDoctorAppointments(long doctorId);
 
     void updateStatusByDoctor(long doctorId, long appointmentId, AppointmentStatus status);
+
+    List<Pet> getDoctorPatients(long doctorId);
+
+    List<Appointment> getOwnerAppointments(long ownerId);
 }
 

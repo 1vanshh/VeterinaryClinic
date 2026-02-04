@@ -24,6 +24,8 @@ public class OwnerMenu extends BaseMenu {
         this.appointmentService = appointmentService;
         this.adminService = adminService;
 
+        addCommand(new ViewMyAppointmentsCommand(ownerId, appointmentService, ownerService));
+
         addCommand(new ListMyPetsCommand(ownerId, ownerService));
         addCommand(new UpdateMyPetCommand(in, ownerId, ownerService));
 
