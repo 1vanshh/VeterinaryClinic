@@ -24,8 +24,7 @@ createdb -U postgres VeterinaryClinic
 ```bash
 psql -U postgres -d VeterinaryClinic -f schema.sql
 ```
-
----
+**Не забудьте указать свои данные подключения к базе данных в файле `db.properties.example` и удалить `.example` в имени файла.**
 
 # Сборка и запуск приложения
 
