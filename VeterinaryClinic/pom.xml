@@ -60,7 +60,6 @@
                 </configuration>
             </plugin>
 
-            <!-- ЗАМЕНА: maven-jar-plugin на maven-shade-plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
