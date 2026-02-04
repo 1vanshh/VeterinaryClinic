@@ -18,7 +18,7 @@ public class JdbcAppointmentRepository implements AppointmentRepository {
     private static final String FIND_BY_DOCTOR_SQL = "SELECT * FROM appointment WHERE doctor_id = ?";
     private static final String FIND_BY_PET_SQL = "SELECT * FROM appointment WHERE pet_id = ?";
     private static final String EXISTS_OVERLAP_SQL =
-            "SELECT EXISTS(SELECT 1 FROM appointment WHERE doctor_id = ? AND status <> 'cancelled' AND starts_at < ? AND ends_at > ?)";
+            "SELECT EXISTS(SELECT 1 FROM appointment WHERE doctor_id = ? AND status IN ('planned', 'no_show') AND starts_at < ? AND ends_at > ?)";
 
     private static final String EXISTS_BY_DOCTOR_SQL =
             "SELECT EXISTS(SELECT 1 FROM appointment WHERE doctor_id = ? AND starts_at = ?)";

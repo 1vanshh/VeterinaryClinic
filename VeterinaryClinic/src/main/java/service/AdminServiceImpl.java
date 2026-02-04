@@ -5,6 +5,8 @@ import repository.*;
 
 import java.util.List;
 
+import static service.validator.TimeValidator.validateTime;
+
 public class AdminServiceImpl implements AdminService {
 
     private final OwnerRepository ownerRepository;
@@ -123,8 +125,22 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void addAppointment(Appointment appointment) {
+        validateTime(appointment.getStartsAt(), appointment.getEndsAt());
+
         ensurePetExists(appointment.getPetId());
         ensureDoctorExists(appointment.getDoctorId());
+
+        if (appointment.getStatus() != AppointmentStatus.CANCELLED) {
+            boolean conflict = appointmentRepository.existsOverlapping(
+                    appointment.getDoctorId(),
+                    appointment.getStartsAt(),
+                    appointment.getEndsAt()
+            );
+
+            if (conflict) {
+                throw new IllegalStateException("Это время уже занято у врача");
+            }
+        }
 
         appointmentRepository.insert(appointment);
     }
@@ -134,6 +150,22 @@ public class AdminServiceImpl implements AdminService {
         ensureAppointmentExists(appointmentId);
         ensurePetExists(newAppointment.getPetId());
         ensureDoctorExists(newAppointment.getDoctorId());
+
+        validateTime(newAppointment.getStartsAt(), newAppointment.getEndsAt());
+
+        if (newAppointment.getStatus() != AppointmentStatus.CANCELLED && newAppointment.getStatus() != AppointmentStatus.DONE) {
+
+            boolean conflict = appointmentRepository.existsOverlapping(
+                    newAppointment.getDoctorId(),
+                    newAppointment.getStartsAt(),
+                    newAppointment.getEndsAt()
+            );
+
+            if (conflict) {
+                throw new IllegalStateException("Это время уже занято у врача");
+            }
+        }
+
         appointmentRepository.update(appointmentId, newAppointment);
     }
 

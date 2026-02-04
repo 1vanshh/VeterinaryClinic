@@ -24,7 +24,7 @@ public class AddPetCommand implements Command {
         String name = in.readLine("name: ");
         String species = in.readLine("species: ");
         String breed = in.readLine("breed: ");
-        String g = in.readLine("gender (MALE/FEMALE или пусто): ").toUpperCase(Locale.ROOT);
+        String g = in.readLine("gender (MALE/FEMALE или unknown): ").toUpperCase(Locale.ROOT);
 
         Gender gender = null;
         if (!g.isBlank()) {
